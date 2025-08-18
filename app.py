@@ -1,12 +1,12 @@
 import os
 import duckdb
-import urllib.request
 import pandas as pd
-
+import subprocess
 from shiny.express import render, ui
 
 if not os.path.isfile("Registro_Global_Genes_y_Diagnosticos.duckdb"):
-    urllib.request.urlretrieve(os.getenv("DB_FILE"), "Registro_Global_Genes_y_Diagnosticos.duckdb")
+    subprocess.call("build_db.py")
+    subprocess.call("sheet_processing.py")
 
 ui.page_opts(fillable=True)
 db = duckdb.connect("Registro_Global_Genes_y_Diagnosticos.duckdb")
