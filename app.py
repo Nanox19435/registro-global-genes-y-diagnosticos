@@ -45,16 +45,16 @@ def inheritance(row):
 
 
 df["Inheritance"] = df.apply(inheritance, axis=1)
-
-df = df[["gene", "name", "omim", "category", "Inheritance", "observations"]]
-df["observations"] = ["" if "nan" == obs else obs for obs in df["observations"]]
+df = df[["gene", "name", "omim", "category", "Inheritance"]]
+# TODO: update the databse so that it supports this two new columns. They are left empty for now since there is no data to fill them.
+df["Confirmed Patients"] = ""
+df["Informed by"] = ""
 df = df.rename(
     columns={
         "gene": "Gene",
         "name": "Disease",
         "omim": "OMIM #",
         "category": "Disease Category",
-        "observations": "Observations",
     }
 )
 ui.page_opts(
@@ -75,7 +75,7 @@ with ui.navset_card_tab(id="tab"):
                 "."
                 ),
             ui.p("""
-Genes and disease curation has led by: Juan C. Zenteno, Vianey Ordoñez-Labastida, Luis Montes-Almanza, Froylan Garcia-Martinez, Alejandro Martinez-Herrera, David Carreño-Bolaños, Rocio Arce-Gonzalez2, Oscar F. Chacón-Camacho, from the Rare Diseases Diagnostic Unit (UDER)-Faculty of Medicine , UAM and the Department of Genetics of the Institute of Ophthalmology “Conde de Valenciana”, Mexico City, Mexico
+Genes and disease curation has led by: Juan C. Zenteno, Vianey Ordoñez-Labastida, Luis Montes-Almanza, Froylan Garcia-Martinez, Alejandro Martinez-Herrera, David Carreño-Bolaños, Rocio Arce-Gonzalez and Oscar F. Chacón-Camacho, from the Rare Diseases Diagnostic Unit (UDER)-Faculty of Medicine , UNAM and the Department of Genetics of the Institute of Ophthalmology “Conde de Valenciana”, Mexico City, Mexico
             """),
         )
         
@@ -148,7 +148,7 @@ series.dataFields.category = "inheritance";
                     gene_count = category_gene.groupby("category")["gene"].nunique()
                     table = pd.DataFrame(data={"n (%)": category_count, "Involved genes/loci": gene_count})
                     table.loc["Total"] = table.sum()
-                    table["Disease Category"] = table.index
+                    table["Disease Category"] = [disease.title().replace("And", "and") for disease in table.index]
                     table = table[["Disease Category", "n (%)", "Involved genes/loci"]]
                     return render.DataGrid(table, width="100%")
 
