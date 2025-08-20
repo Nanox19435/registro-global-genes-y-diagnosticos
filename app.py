@@ -22,7 +22,6 @@ def full_names(acronym):
             return "Mitochondrial"
 
 
-ui.page_opts(fillable=True)
 db = duckdb.connect("Registro_Global_Genes_y_Diagnosticos.duckdb")
 i_data = db.execute("SELECT * FROM diseases").df()
 g_data = db.execute("SELECT * FROM genes").df()
@@ -32,9 +31,9 @@ df["omim"] = [
     ui.HTML(
         f'<a href="https://www.omim.org/entry/{id}">{id}</a>'
         if 0 < id
-        else "<span>N/A</span>"
+        else f'<p>{obs}</p>'
     )
-    for id in df["omim"]
+    for id, obs in zip(df["omim"], df["observations"])
 ]
 
 
@@ -58,8 +57,28 @@ df = df.rename(
         "observations": "Observations",
     }
 )
-
+ui.page_opts(
+    title=ui.img(src="logo.jpeg", style="width:500px"),
+    window_title="MexGDD",
+    fillable=True,
+    )
 with ui.navset_card_tab(id="tab"):
+    with ui.nav_panel("Summary"):
+        ui.div(
+            ui.p(
+            "MexGDD is a curated database of genetic diseases occurring in Mexico and confirmed by DNA testing. ",
+            
+            ),
+            ui.p(
+                "Information on genes carrying disease-causing mutations and resulting phenotypes are included. For any contribution or comment please contact us directly at: ",
+                ui.a("jczenteno@facmed.unam.mx", href="mailto:jczenteno@facmed.unam.mx"),
+                "."
+                ),
+            ui.p("""
+Genes and disease curation has led by: Juan C. Zenteno, Vianey Ordoñez-Labastida, Luis Montes-Almanza, Froylan Garcia-Martinez, Alejandro Martinez-Herrera, David Carreño-Bolaños, Rocio Arce-Gonzalez2, Oscar F. Chacón-Camacho, from the Rare Diseases Diagnostic Unit (UDER)-Faculty of Medicine , UAM and the Department of Genetics of the Institute of Ophthalmology “Conde de Valenciana”, Mexico City, Mexico
+            """),
+        )
+        
     with ui.nav_panel("Statistics"):
         with ui.layout_columns():
             with ui.card(full_screen=True):
@@ -105,6 +124,8 @@ var chart = am4core.create("chartdiv", am4charts.PieChart3D);
 chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
 
 chart.legend = new am4charts.Legend();
+chart.legend.labels.template.text = "{{inheritance}}: n={{instances}}";
+chart.legend.valueLabels.template.text = "";
 
 chart.data = {inheritance_counts};
 
@@ -126,8 +147,9 @@ series.dataFields.category = "inheritance";
                     category_count = category_gene["category"].value_counts()
                     gene_count = category_gene.groupby("category")["gene"].nunique()
                     table = pd.DataFrame(data={"n (%)": category_count, "Involved genes/loci": gene_count})
-                    table["Disease category"] = table.index
-                    table = table[["Disease category", "n (%)", "Involved genes/loci"]]
+                    table.loc["Total"] = table.sum()
+                    table["Disease Category"] = table.index
+                    table = table[["Disease Category", "n (%)", "Involved genes/loci"]]
                     return render.DataGrid(table, width="100%")
 
     with ui.nav_panel("Genes"):
