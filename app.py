@@ -31,7 +31,7 @@ df["omim"] = [
     ui.HTML(
         f'<a href="https://www.omim.org/entry/{id}">{id}</a>'
         if 0 < id
-        else f'<p>{obs}</p>'
+        else f"<p>{obs}</p>"
     )
     for id, obs in zip(df["omim"], df["observations"])
 ]
@@ -61,24 +61,25 @@ ui.page_opts(
     title=ui.img(src="logo.jpeg", style="width:500px"),
     window_title="MexGDD",
     fillable=True,
-    )
+)
 with ui.navset_card_tab(id="tab"):
     with ui.nav_panel("Summary"):
         ui.div(
             ui.p(
-            "MexGDD is a curated database of genetic diseases occurring in Mexico and confirmed by DNA testing. ",
-            
+                "MexGDD is a curated database of over 600 genetic diseases occurring in Mexico and confirmed by DNA testing in a single hospital-based center from 2005 to 2025. ",
             ),
             ui.p(
                 "Information on genes carrying disease-causing mutations and resulting phenotypes are included. For any contribution or comment please contact us directly at: ",
-                ui.a("jczenteno@facmed.unam.mx", href="mailto:jczenteno@facmed.unam.mx"),
-                "."
+                ui.a(
+                    "jczenteno@facmed.unam.mx", href="mailto:jczenteno@facmed.unam.mx"
                 ),
+                ".",
+            ),
             ui.p("""
 Genes and disease curation has led by: Juan C. Zenteno, Vianey Ordoñez-Labastida, Luis Montes-Almanza, Froylan Garcia-Martinez, Alejandro Martinez-Herrera, David Carreño-Bolaños, Rocio Arce-Gonzalez and Oscar F. Chacón-Camacho, from the Rare Diseases Diagnostic Unit (UDER)-Faculty of Medicine , UNAM and the Department of Genetics of the Institute of Ophthalmology “Conde de Valenciana”, Mexico City, Mexico
             """),
         )
-        
+
     with ui.nav_panel("Statistics"):
         with ui.layout_columns():
             with ui.card(full_screen=True):
@@ -141,14 +142,22 @@ series.dataFields.category = "inheritance";
                 """)
             with ui.card(full_screen=True):
                 ui.card_header("Disease Category and Gene distribution")
+
                 @render.data_frame
                 def table():
                     category_gene = db.execute("SELECT category, gene FROM genes").df()
                     category_count = category_gene["category"].value_counts()
                     gene_count = category_gene.groupby("category")["gene"].nunique()
-                    table = pd.DataFrame(data={"n (%)": category_count, "Involved genes/loci": gene_count})
+                    table = pd.DataFrame(
+                        data={
+                            "n (%)": category_count,
+                            "Involved genes/loci": gene_count,
+                        }
+                    )
                     table.loc["Total"] = table.sum()
-                    table["Disease Category"] = [disease.title().replace("And", "and") for disease in table.index]
+                    table["Disease Category"] = [
+                        disease.title().replace("And", "and") for disease in table.index
+                    ]
                     table = table[["Disease Category", "n (%)", "Involved genes/loci"]]
                     return render.DataGrid(table, width="100%")
 
