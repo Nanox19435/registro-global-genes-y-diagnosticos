@@ -47,7 +47,7 @@ def inheritance(row):
 df["Inheritance"] = df.apply(inheritance, axis=1)
 df = df[["gene", "name", "omim", "category", "Inheritance"]]
 # TODO: update the databse so that it supports this two new columns. They are left empty for now since there is no data to fill them.
-df["Confirmed Patients"] = ""
+df["Number of Confirmed Patients"] = ""
 df["Informed by"] = ""
 df = df.rename(
     columns={
