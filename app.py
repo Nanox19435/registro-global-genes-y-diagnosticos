@@ -97,7 +97,6 @@ Genes and disease curation has led by: Juan C. Zenteno, Vianey Ordoñez-Labastid
                     .replace("'inheritance'", "inheritance")
                     .replace("'instances'", "instances")
                 )
-                print(inheritance_counts)
                 ui.HTML(f"""
 <!-- Styles -->
 <style>
@@ -154,7 +153,10 @@ series.dataFields.category = "inheritance";
                             "Involved genes/loci": gene_count,
                         }
                     )
-                    table.loc["Total"] = table.sum()
+                    total = table.sum()
+                    table.loc["Total"] = total
+                    table["n (%)"] = [f"{n} ({n/total["n (%)"]:.2%})" for n in table["n (%)"]]
+                    table["n (%)"]["Total"] = f"{sum(category_count)} (100%)"
                     table["Disease Category"] = [
                         disease.title().replace("And", "and") for disease in table.index
                     ]
