@@ -155,7 +155,7 @@ series.dataFields.category = "inheritance";
                     )
                     total = table.sum()
                     table.loc["Total"] = total
-                    table["n (%)"] = [f"{n} ({n/total["n (%)"]:.2%})" for n in table["n (%)"]]
+                    table["n (%)"] = [f"{n} ({n/total.get("n (%)"):.2%})" for n in table["n (%)"]]
                     table["n (%)"]["Total"] = f"{sum(category_count)} (100%)"
                     table["Disease Category"] = [
                         disease.title().replace("And", "and") for disease in table.index
