@@ -33,7 +33,7 @@ df["omim"] = [
     ui.HTML(
         f'<a href="https://www.omim.org/entry/{omim}">{omim}</a>'
         if 0 < omim
-        else f"<p>{o_data[o_data["entry_id"] == 38].values[0][1]}</p>"
+        else f"<p>{o_data[o_data['entry_id'] == 38].values[0][1]}</p>"
     )
     for id, omim in enumerate(df["omim"])
 ]
