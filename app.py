@@ -25,19 +25,22 @@ def full_names(acronym):
 db = duckdb.connect("Registro_Global_Genes_y_Diagnosticos.duckdb")
 i_data = db.execute("SELECT * FROM diseases").df()
 g_data = db.execute("SELECT * FROM genes").df()
-# No se muestran los indices al usuario
+o_data = db.execute("SELECT * FROM reference").df()
+
 df = pd.merge(left=g_data, right=i_data, how="left", on="disease_id")
+print(df)
 df["omim"] = [
     ui.HTML(
-        f'<a href="https://www.omim.org/entry/{id}">{id}</a>'
-        if 0 < id
-        else f"<p>{obs}</p>"
+        f'<a href="https://www.omim.org/entry/{omim}">{omim}</a>'
+        if 0 < omim
+        else f"<p>{o_data[o_data["entry_id"] == 38].values[0][1]}</p>"
     )
-    for id, obs in zip(df["omim"], df["observations"])
+    for id, omim in enumerate(df["omim"])
 ]
 
 
 def inheritance(row):
+    inheritance = row["inheritance"]
     if bool(row["somatism"]):
         return row["inheritance"] + " (somatic)"
     else:
@@ -45,9 +48,8 @@ def inheritance(row):
 
 
 df["Inheritance"] = df.apply(inheritance, axis=1)
-df = df[["gene", "name", "omim", "category", "Inheritance"]]
-# TODO: update the databse so that it supports this two new columns. They are left empty for now since there is no data to fill them.
-df["Number of Confirmed Patients"] = ""
+df = df[["gene", "name", "omim", "category", "Inheritance", "cases"]]
+# TThis column will be filled using contributions
 df["Informed by"] = ""
 df = df.rename(
     columns={
@@ -55,6 +57,7 @@ df = df.rename(
         "name": "Disease",
         "omim": "OMIM #",
         "category": "Disease Category",
+        "cases": "Number of Confirmed Patients"
     }
 )
 ui.page_opts(

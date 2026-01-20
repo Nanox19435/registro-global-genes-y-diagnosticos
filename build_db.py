@@ -40,7 +40,15 @@ def build():
             category disease_category,
             inheritance VARCHAR(2),
             somatism BOOLEAN,
-            observations VARCHAR(100),
+            cases INTEGER,
             FOREIGN KEY (disease_id) REFERENCES diseases(disease_id)
+        )
+    """)
+
+    connection.execute("""
+        CREATE TABLE reference (
+            entry_id INTEGER PRIMARY KEY,
+            observation VARCHAR(50),
+            FOREIGN KEY (entry_id) REFERENCES genes(entry_id)
         )
     """)

@@ -6,30 +6,29 @@ def fill_db():
     data = pd.read_csv("data.csv")
     db = duckdb.connect("Registro_Global_Genes_y_Diagnosticos.duckdb")
 
-    diseases = sorted(data["DISEASE"].map(lambda x: x.strip()).unique())
+    diseases = sorted(data["Disease"].map(lambda x: str(x).strip()).unique())
     for idx, disease in enumerate(diseases):
         print(disease)
         db.execute("INSERT INTO diseases VALUES (?, ?)", [idx, disease])
 
-    # gene_data = data[~data["GENES"].str.contains("p|q")]
     for idx, row in data.iterrows():
         print(row)
-        gene = row["GENES"]
+        gene = row["Gene"]
 
-        disease = row["DISEASE"]
+        disease = row["Disease"]
         disease = db.execute("SELECT * FROM diseases WHERE name LIKE ?", [disease.strip()]).df()["disease_id"].item()
         
-        omim = row[" OMIM #"]
+        omim = row["OMIM #"]
         if math.isnan(omim):
             omim = -1
         
-        category = row["DISEASE CATEGORY"].strip().lower()
+        category = row["Disease Category"].strip().lower() 
         
-        inheritance = row["INHERITANCE"]
+        inheritance = row["Inheritance"]
         somatism = inheritance.endswith("(somatic)")
         inheritance = inheritance.removesuffix("(somatic)").strip()
-        
-        observations = row["References for disease without OMIM code"]
+
+        cases = row["UDER"] + row["CONDE"]
 
         db.execute(
             "INSERT INTO genes VALUES (?,?,?,?,?,?,?,?)",
@@ -41,6 +40,9 @@ def fill_db():
                 category,
                 inheritance,
                 somatism,
-                observations
+                cases
             ]
         )
+
+        if omim < 0:
+            db.execute("INSERT INTO reference VALUES (?,?)", [idx, row["References for diseases without OMIM code"]])
