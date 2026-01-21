@@ -266,7 +266,7 @@
 229,IFT140,265,"Retinitis pigmentosa, type 80",617781,Ocular,AR,,8,0,
 230,IMPG1,266,"Retinitis pigmentosa, type 91",153870,Ocular,AD,,4,0,
 231,IMPG2,267,"Retinitis pigmentosa, type 56",613581,Ocular,AR,,4,0,
-,,268,"Macular dystrophy, vitelliform, 5",	616152,Ocular,AD,,9,0,
+,IMPG2,268,"Macular dystrophy, vitelliform, 5",	616152,Ocular,AD,,9,0,
 232,IRF2BPL,269,"Neurodevelopmental disorder with regression, abnormal movements, loss of speech, and seizures",618088,Neurodevelopmental,AD,,0,1,
 233,JAG1,270,"Alagille syndrome, type 1",118450,Ocular,AD,,3,1,
 234,KCNB1,271,"Developmental and epileptic encephalopathy, type 26",616056,Neurodevelopmental,AD,,0,1,
