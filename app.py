@@ -69,18 +69,20 @@ with ui.navset_card_tab(id="tab"):
     with ui.nav_panel("Summary"):
         ui.div(
             ui.p(
-                "MexGDD is a curated database of over 600 genetic diseases occurring in Mexico and confirmed by DNA testing in a single hospital-based center from 2005 to 2025. ",
+                "MexGDD is a curated database of over 600 genetic diseases occurring in Mexico and confirmed by DNA testing in a single hospital-based center from 2005 to 2025.",
+                class_ = "fw-bold"
             ),
             ui.p(
-                "Information on genes carrying disease-causing mutations and resulting phenotypes are included. For any contribution or comment please contact us directly at: ",
+                "Information on genes carrying disease-causing mutations and resulting phenotypes are included. For any contribution or comment please contact us directly at:",
                 ui.a(
                     "jczenteno@facmed.unam.mx", href="mailto:jczenteno@facmed.unam.mx"
                 ),
                 ".",
+                class_ = "fw-bold"
             ),
             ui.p("""
 Genes and disease curation has led by: Juan C. Zenteno, Vianey Ordoñez-Labastida, Luis Montes-Almanza, Froylan Garcia-Martinez, Alejandro Martinez-Herrera, David Carreño-Bolaños, Rocio Arce-Gonzalez and Oscar F. Chacón-Camacho, from the Rare Diseases Diagnostic Unit (UDER)-Faculty of Medicine , UNAM and the Department of Genetics of the Institute of Ophthalmology “Conde de Valenciana”, Mexico City, Mexico
-            """),
+            """, class_ = "fw-bold"),
         )
 
     with ui.nav_panel("Statistics"):
@@ -164,10 +166,17 @@ series.dataFields.category = "inheritance";
                         disease.title().replace("And", "and") for disease in table.index
                     ]
                     table = table[["Disease Category", "n (%)", "Involved genes/loci"]]
-                    return render.DataGrid(table, width="100%")
+                    return render.DataGrid(table, width="100%", styles=[{"style": {"font-weight": "bold"}}])
 
     with ui.nav_panel("Genes"):
 
         @render.data_frame
         def gene_db():
-            return render.DataGrid(df, width="100%", filters=True)
+            return render.DataGrid(
+                df, 
+                width="100%", 
+                filters=True, 
+                styles=[
+                    {"style": {"font-weight": "bold"}}
+                ]
+            )
