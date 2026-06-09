@@ -49,5 +49,5 @@ def fill_db():
 
         contributor = row["Informed by"]
 
-        if contributor:
+        if pd.notna(contributor):
             db.execute("INSERT INTO collaborators VALUES (?, ?)", [idx, contributor])
