@@ -8,11 +8,11 @@ def fill_db():
 
     diseases = sorted(data["Disease"].map(lambda x: str(x).strip()).unique())
     for idx, disease in enumerate(diseases):
-        print(disease)
+        #print(disease)
         db.execute("INSERT INTO diseases VALUES (?, ?)", [idx, disease])
 
     for idx, row in data.iterrows():
-        print(row)
+        #print(row)
         gene = row["Gene"]
 
         disease = row["Disease"]
@@ -46,3 +46,8 @@ def fill_db():
 
         if omim < 0:
             db.execute("INSERT INTO reference VALUES (?,?)", [idx, row["References for diseases without OMIM code"]])
+
+        contributor = row["Informed by"]
+
+        if contributor:
+            db.execute("INSERT INTO collaborators VALUES (?, ?)", [idx, contributor])

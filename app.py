@@ -26,9 +26,9 @@ db = duckdb.connect("Registro_Global_Genes_y_Diagnosticos.duckdb")
 i_data = db.execute("SELECT * FROM diseases").df()
 g_data = db.execute("SELECT * FROM genes").df()
 o_data = db.execute("SELECT * FROM reference").df()
+collaborators = db.execute("SELECT * FROM collaborators").df()
 
 df = pd.merge(left=g_data, right=i_data, how="left", on="disease_id")
-print(df)
 df["omim"] = [
     ui.HTML(
         f'<a href="https://www.omim.org/entry/{omim}">{omim}</a>'
@@ -38,26 +38,26 @@ df["omim"] = [
     for id, omim in enumerate(df["omim"])
 ]
 
+df = pd.merge(left=df, right=collaborators, how="left", on="entry_id")
 
 def inheritance(row):
     inheritance = row["inheritance"]
     if bool(row["somatism"]):
-        return row["inheritance"] + " (somatic)"
+        return inheritance + " (somatic)"
     else:
-        return row["inheritance"]
+        return inheritance
 
 
 df["Inheritance"] = df.apply(inheritance, axis=1)
-df = df[["gene", "name", "omim", "category", "Inheritance", "cases"]]
-# TThis column will be filled using contributions
-df["Informed by"] = ""
+df = df[["gene", "name", "omim", "category", "Inheritance", "cases", "informed_by"]]
 df = df.rename(
     columns={
         "gene": "Gene",
         "name": "Disease",
         "omim": "OMIM #",
         "category": "Disease Category",
-        "cases": "Number of Confirmed Patients"
+        "cases": "Number of Confirmed Patients",
+        "informed_by": "Informed by"
     }
 )
 ui.page_opts(

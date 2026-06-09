@@ -52,3 +52,11 @@ def build():
             FOREIGN KEY (entry_id) REFERENCES genes(entry_id)
         )
     """)
+
+    connection.execute("""
+        CREATE TABLE collaborators (
+            entry_id INTEGER PRIMARY KEY,
+            informed_by VARCHAR(100),
+            FOREIGN KEY (entry_id) REFERENCES genes(entry_id)
+        )
+    """)
