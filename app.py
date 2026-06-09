@@ -73,7 +73,7 @@ with ui.navset_card_tab(id="tab"):
                 class_ = "fw-bold"
             ),
             ui.p(
-                "Information on genes carrying disease-causing mutations and resulting phenotypes are included. For any contribution or comment please contact us directly at:",
+                "Information on genes carrying disease-causing mutations and resulting phenotypes are included. For any contribution or comment please contact us directly at: ",
                 ui.a(
                     "jczenteno@facmed.unam.mx", href="mailto:jczenteno@facmed.unam.mx"
                 ),
@@ -81,9 +81,14 @@ with ui.navset_card_tab(id="tab"):
                 class_ = "fw-bold"
             ),
             ui.p("""
-Genes and disease curation was led by: Juan C. Zenteno, Vianey Ordoñez-Labastida, Luis Montes-Almanza, Froylan Garcia-Martinez, Alejandro Martinez-Herrera, David Carreño-Bolaños, Rocio Arce-Gonzalez and Oscar F. Chacón-Camacho, from the Rare Diseases Diagnostic Unit (UDER)-Faculty of Medicine , UNAM and the Department of Genetics of the Institute of Ophthalmology “Conde de Valenciana”, Mexico City, Mexico
+Genes and disease curation was led by: Juan C. Zenteno, Vianey Ordoñez-Labastida, Luis Montes-Almanza, Froylan Garcia-Martinez, Alejandro Martinez-Herrera, David Carreño-Bolaños, Rocio Arce-Gonzalez and Oscar F. Chacón-Camacho, from the Rare Diseases Diagnostic Unit (UDER)-Faculty of Medicine , UNAM and the Department of Genetics of the Institute of Ophthalmology “Conde de Valenciana”, Mexico City, Mexico.
             """, class_ = "fw-bold"),
+            ui.a("Read the MexGDD article in Orphanet Journal of Rare Diseases.", href="https://link.springer.com/article/10.1186/s13023-026-04318-1"),
+            ui.p(),
+            ui.p("Version V1.1 released March 20 2026."),
+            ui.p("Current version V1.2 released June 8 2026.")
         )
+
 
     with ui.nav_panel("Statistics"):
         with ui.layout_columns():
