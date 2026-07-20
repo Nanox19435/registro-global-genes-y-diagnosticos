@@ -1,12 +1,18 @@
 import os
+import logging
 import pandas as pd
 
 from shiny.express import render, ui
 from sqlalchemy import create_engine, text
 
+
+logging.basicConfig(level=logging.INFO)
+logging.info("Starting app...")
+
 df = None
 
 if not os.path.isfile("data.csv"):
+    logging.info("Connecting to database")
     DB_CONFIG = {
         'host': os.getenv('DB_ADDRESS'),
         'port': os.getenv('DB_PORT'),
@@ -23,7 +29,6 @@ if not os.path.isfile("data.csv"):
     observations = pd.read_sql("SELECT * FROM reference", conn)
     collaborators = pd.read_sql("SELECT * FROM collaborators", conn)
     patients = pd.read_sql("SELECT * FROM patients", conn)
-    inheritance_counts = (pd.read_sql("SELECT inheritance FROM genes", conn).value_counts())
 
     case_count = pd.read_sql("""
     SELECT 
@@ -71,18 +76,13 @@ if not os.path.isfile("data.csv"):
 else:
     df = pd.read_csv("data.csv")
 
-inheritance_counts = df["Inheritance"].str[:2].value_counts()
-
-def full_names(acronym):
-    match acronym:
-        case "AD":
-            return "Autosomal Dominant"
-        case "AR":
-            return "Autosomal recessive"
-        case "XL":
-            return "X-linked"
-        case "MT":
-            return "Mitochondrial"
+logging.info("Database loaded")
+inheritance_counts = df["Inheritance"].str[:2].value_counts().rename({
+    "AD": "Autosomal Dominant",
+    "AR": "Autosomal recessive",
+    "XL": "X-linked",
+    "MT": "Mitochondrial"
+})
 
 ui.page_opts(
     title=ui.img(src="logo.jpeg", style="width:500px"),
@@ -121,7 +121,7 @@ Genes and disease curation was led by: Juan C. Zenteno, Vianey Ordoñez-Labastid
                 inheritance_counts = (
                     str(
                         [
-                            {"inheritance": full_names(a[0]), "instances": b}
+                            {"inheritance": a, "instances": b}
                             for a, b in inheritance_counts.items()
                         ]
                     )
@@ -175,9 +175,9 @@ series.dataFields.category = "inheritance";
 
                 @render.data_frame
                 def table():
-                    category_gene = pd.read_sql("SELECT category, gene FROM genes", conn)
-                    category_count = category_gene["category"].value_counts()
-                    gene_count = category_gene.groupby("category")["gene"].nunique()
+                    category_gene = df[["Disease Category", "Gene"]]#pd.read_sql("SELECT category, gene FROM genes", conn)
+                    category_count = category_gene["Disease Category"].value_counts()
+                    gene_count = category_gene.groupby("Disease Category")["Gene"].nunique()
                     table = pd.DataFrame(
                         data={
                             "n (%)": category_count,
