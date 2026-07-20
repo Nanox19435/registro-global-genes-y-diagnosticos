@@ -1,14 +1,77 @@
 import os
-import duckdb
-import build_db
 import pandas as pd
-import sheet_processing
+
 from shiny.express import render, ui
+from sqlalchemy import create_engine, text
 
-if not os.path.isfile("Registro_Global_Genes_y_Diagnosticos.duckdb"):
-    build_db.build()
-    sheet_processing.fill_db()
+df = None
 
+if not os.path.isfile("data.csv"):
+    DB_CONFIG = {
+        'host': os.getenv('DB_ADDRESS'),
+        'port': os.getenv('DB_PORT'),
+        'database': 'mexgdd',
+        'user': os.getenv('DB_USER'),
+        'password': os.getenv('DB_PWD')
+    }
+
+    conn = create_engine(
+        f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['database']}"
+    )
+
+    genes = pd.read_sql("SELECT * FROM genes", conn)
+    observations = pd.read_sql("SELECT * FROM reference", conn)
+    collaborators = pd.read_sql("SELECT * FROM collaborators", conn)
+    patients = pd.read_sql("SELECT * FROM patients", conn)
+    inheritance_counts = (pd.read_sql("SELECT inheritance FROM genes", conn).value_counts())
+
+    case_count = pd.read_sql("""
+    SELECT 
+        genes.entry_id,
+        COALESCE(optional_counts.cases, 0) + COUNT(patients.entry_id) as cases
+    FROM genes
+    LEFT JOIN optional_counts ON optional_counts.entry_id = genes.entry_id
+    LEFT JOIN patients ON patients.entry_id = genes.entry_id
+    GROUP BY genes.entry_id, optional_counts.cases
+    ORDER BY genes.entry_id;
+    """, conn)
+
+    df = pd.merge(left=genes, right=case_count, how="left", on="entry_id")
+    df = pd.merge(left=df, right=collaborators, how="left", on="entry_id")
+    df["omim"] = [
+        ui.HTML(
+            f'<a href="https://www.omim.org/entry/{omim}">{omim}</a>'
+            if 0 < omim
+            else f"<p>{observations[observations['entry_id'] == id].values[0][1]}</p>"
+        )
+        for id, omim in enumerate(df["omim"])
+    ]
+
+
+    def inheritance(row):
+        inheritance = row["inheritance"]
+        if bool(row["somatism"]):
+            return inheritance + " (somatic)"
+        else:
+            return inheritance
+
+    df["Inheritance"] = df.apply(inheritance, axis=1)
+    df = df[["gene", "disease", "omim", "category", "Inheritance", "cases", "informed_by"]]
+    df = df.rename(
+        columns={
+            "gene": "Gene",
+            "name": "Disease",
+            "omim": "OMIM #",
+            "category": "Disease Category",
+            "cases": "Number of Confirmed Patients",
+            "informed_by": "Informed by"
+        }
+    )
+    df.to_csv("data.csv", index=False)
+else:
+    df = pd.read_csv("data.csv")
+
+inheritance_counts = df["Inheritance"].str[:2].value_counts()
 
 def full_names(acronym):
     match acronym:
@@ -21,45 +84,6 @@ def full_names(acronym):
         case "MT":
             return "Mitochondrial"
 
-
-db = duckdb.connect("Registro_Global_Genes_y_Diagnosticos.duckdb")
-i_data = db.execute("SELECT * FROM diseases").df()
-g_data = db.execute("SELECT * FROM genes").df()
-o_data = db.execute("SELECT * FROM reference").df()
-collaborators = db.execute("SELECT * FROM collaborators").df()
-
-df = pd.merge(left=g_data, right=i_data, how="left", on="disease_id")
-df["omim"] = [
-    ui.HTML(
-        f'<a href="https://www.omim.org/entry/{omim}">{omim}</a>'
-        if 0 < omim
-        else f"<p>{o_data[o_data['entry_id'] == id].values[0][1]}</p>"
-    )
-    for id, omim in enumerate(df["omim"])
-]
-
-df = pd.merge(left=df, right=collaborators, how="left", on="entry_id")
-
-def inheritance(row):
-    inheritance = row["inheritance"]
-    if bool(row["somatism"]):
-        return inheritance + " (somatic)"
-    else:
-        return inheritance
-
-
-df["Inheritance"] = df.apply(inheritance, axis=1)
-df = df[["gene", "name", "omim", "category", "Inheritance", "cases", "informed_by"]]
-df = df.rename(
-    columns={
-        "gene": "Gene",
-        "name": "Disease",
-        "omim": "OMIM #",
-        "category": "Disease Category",
-        "cases": "Number of Confirmed Patients",
-        "informed_by": "Informed by"
-    }
-)
 ui.page_opts(
     title=ui.img(src="logo.jpeg", style="width:500px"),
     window_title="MexGDD",
@@ -94,9 +118,6 @@ Genes and disease curation was led by: Juan C. Zenteno, Vianey Ordoñez-Labastid
         with ui.layout_columns():
             with ui.card(full_screen=True):
                 ui.card_header("Frequency of Inheritance Patterns")
-                inheritance_counts = (
-                    db.execute("SELECT inheritance FROM genes").df().value_counts()
-                )
                 inheritance_counts = (
                     str(
                         [
@@ -154,7 +175,7 @@ series.dataFields.category = "inheritance";
 
                 @render.data_frame
                 def table():
-                    category_gene = db.execute("SELECT category, gene FROM genes").df()
+                    category_gene = pd.read_sql("SELECT category, gene FROM genes", conn)
                     category_count = category_gene["category"].value_counts()
                     gene_count = category_gene.groupby("category")["gene"].nunique()
                     table = pd.DataFrame(
