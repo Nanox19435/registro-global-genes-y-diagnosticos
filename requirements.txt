@@ -2,6 +2,7 @@ anyio==4.12.1
 asgiref==3.11.0
 click==8.3.1
 duckdb==1.4.3
+greenlet==3.5.3
 h11==0.16.0
 htmltools==0.6.0
 idna==3.11
@@ -16,6 +17,7 @@ packaging==25.0
 pandas==2.3.3
 platformdirs==4.5.1
 prompt_toolkit==3.0.52
+psycopg2==2.9.12
 python-dateutil==2.9.0.post0
 python-multipart==0.0.21
 pytz==2025.2
@@ -24,6 +26,7 @@ setuptools==80.9.0
 shiny==1.5.1
 shinychat==0.2.8
 six==1.17.0
+SQLAlchemy==2.0.51
 starlette==0.52.1
 typing_extensions==4.15.0
 tzdata==2025.3
