@@ -20,15 +20,19 @@ if not os.path.isfile("data.csv"):
         'user': os.getenv('DB_USER'),
         'password': os.getenv('DB_PWD')
     }
-
     conn = create_engine(
         f"postgresql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['database']}"
     )
+    logging.info("Connection engine created")
 
     genes = pd.read_sql("SELECT * FROM genes", conn)
+    logging.info("Read genes table")
     observations = pd.read_sql("SELECT * FROM reference", conn)
+    logging.info("Read reference table")
     collaborators = pd.read_sql("SELECT * FROM collaborators", conn)
+    logging.info("Read collaborators table")
     patients = pd.read_sql("SELECT * FROM patients", conn)
+    logging.info("Read genes table")
 
     case_count = pd.read_sql("""
     SELECT 
@@ -75,6 +79,7 @@ if not os.path.isfile("data.csv"):
     df.to_csv("data.csv", index=False)
 else:
     df = pd.read_csv("data.csv")
+    df["OMIM #"] = [ui.HTML(e) for e in df["OMIM #"]]
 
 logging.info("Database loaded")
 inheritance_counts = df["Inheritance"].str[:2].value_counts().rename({
