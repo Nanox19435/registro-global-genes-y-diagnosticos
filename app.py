@@ -77,7 +77,7 @@ if not os.path.isfile("data.csv"):
         }
     )
     
-    df = df.sort_values(by="gene", key=lambda gene: "~" + gene if "deletion" in gene or "duplication" in gene else gene)
+    df = df.sort_values(by="Gene", key=lambda gene: "~" + gene if "deletion" in gene or "duplication" in gene else gene)
     
     df.to_csv("data.csv", index=False)
 else:
