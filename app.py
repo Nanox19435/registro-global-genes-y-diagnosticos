@@ -51,7 +51,7 @@ if not os.path.isfile("data.csv"):
         ui.HTML(
             f'<a href="https://www.omim.org/entry/{omim}">{omim}</a>'
             if 0 < omim
-            else f"<p>{observations[observations['entry_id'] == id].informed_by.iloc[0] if not observations[observations['entry_id'] == id].informed_by.empty else "n/a"}</p>"
+            else f"<p>{observations[observations['entry_id'] == id].informed_by.iloc[0] if not observations[observations['entry_id'] == id].informed_by.empty else 'n/a'}</p>"
         )
         for id, omim in enumerate(df["omim"])
     ]
